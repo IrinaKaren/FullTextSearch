@@ -7,8 +7,22 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Produit {
+
+    public static String extractInteger(String requete) throws Exception {
+        String regex = "\\b\\d+\\b";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(requete);
+        if(matcher.find()){
+            return Integer.parseInt(matcher.group())+"";
+        }
+        else{
+            throw new Exception("pas de chiffre");
+        }
+    }
     //Produit
     private int id;
     private String produit;
@@ -165,7 +179,7 @@ public class Produit {
         connection.close();
         return produits;
     }
-     
+    
     public static List<Produit> recherche(String requete) throws Exception {
         List<Produit> produits = new ArrayList<>();
 
@@ -173,23 +187,23 @@ public class Produit {
         for (int i = 0; i < getcategories().size(); i++) {
             for (int j = 0; j < getmarques().size(); j++) {
                 // Rapport qualité-prix
-                if (requete.contains("meilleur") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getcategories().get(i).getCategorie()) && requete.contains(getmarques().get(j).getMarque())) {
+                if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase()) && requete.toLowerCase().contains(getmarques().get(j).getMarque().toLowerCase())) {
                     // Qualité-prix le plus proche de 1
                     return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' AND marque = '" + getmarques().get(j).getMarque() + "' ORDER BY (qualite/prix) DESC LIMIT 1");
                 }
-                if (requete.contains("pire") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getcategories().get(i).getCategorie()) && requete.contains(getmarques().get(j).getMarque())) {
+                if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase()) && requete.toLowerCase().contains(getmarques().get(j).getMarque().toLowerCase())) {
                     // Qualité-prix le plus proche de 1
                     return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' AND marque = '" + getmarques().get(j).getMarque() + "' ORDER BY (qualite/prix) ASC LIMIT 1");
                 }
 
                 // Prix 
-                if (requete.contains("meilleur") && requete.contains("prix") && requete.contains(getmarques().get(j).getMarque()) && requete.contains(getcategories().get(i).getCategorie())) {
+                if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(j).getMarque().toLowerCase()) && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
                     return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MIN(prix) FROM v_produits WHERE marque = '" + getmarques().get(j).getMarque() + "' AND categorie = '" + getcategories().get(i).getCategorie() + "') AND marque = '" + getmarques().get(j).getMarque() + "' AND categorie = '" + getcategories().get(i).getCategorie() + "'");
                 }
-                if (requete.contains("pire") && requete.contains("prix") && requete.contains(getmarques().get(j).getMarque()) && requete.contains(getcategories().get(i).getCategorie())) {
+                if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(j).getMarque().toLowerCase()) && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
                     return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MAX(prix) FROM v_produits WHERE marque = '" + getmarques().get(j).getMarque() + "' AND categorie = '" + getcategories().get(i).getCategorie() + "')");
                 }
-                if (requete.contains("prix") && requete.contains(getmarques().get(j).getMarque()) && requete.contains(getcategories().get(i).getCategorie())) {
+                if (requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(j).getMarque().toLowerCase()) && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
                     return getproduits("SELECT * FROM v_produits WHERE marque = '" + getmarques().get(j).getMarque() + "' AND categorie = '" + getcategories().get(i).getCategorie() + "'");
                 }
             }
@@ -198,77 +212,88 @@ public class Produit {
         // Recherche avec catégorie uniquement
         for (int i = 0; i < getcategories().size(); i++) {
             // Rapport qualité-prix avec catégorie
-            if (requete.contains("meilleur") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getcategories().get(i).getCategorie())) {
+            if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {            
                 // Qualité-prix le plus proche de 1
                 return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' ORDER BY (qualite/prix) DESC LIMIT 1");
             }
-            if (requete.contains("pire") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getcategories().get(i).getCategorie())) {
+            if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
                 // Qualité-prix le plus proche de 1
                 return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' ORDER BY (qualite/prix) ASC LIMIT 1");
             }
 
             // Recherche avec catégorie
-            if (requete.contains("meilleur") && requete.contains("prix") && requete.contains(getcategories().get(i).getCategorie())) {
+            if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
+                if (requete.toLowerCase().contains("top")) {
+                    String integer = extractInteger(requete);
+                    return getproduits("select * from v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' ORDER BY prix ASC LIMIT " + integer);
+                }
+
                 return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MIN(prix) FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "')");
             }
-            if (requete.contains("pire") && requete.contains("prix") && requete.contains(getcategories().get(i).getCategorie())) {
+            if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
+                if (requete.toLowerCase().contains("top")) {
+                    String integer = extractInteger(requete);
+                    return getproduits("select * from v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "' ORDER BY prix DESC LIMIT " + integer);
+                }
                 return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MAX(prix) FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "')");
             }
 
             // Recherche normale
-            if (requete.contains("prix") && requete.contains(getcategories().get(i).getCategorie())) {
+            if (requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getcategories().get(i).getCategorie().toLowerCase())) {
                 return getproduits("SELECT * FROM v_produits WHERE categorie = '" + getcategories().get(i).getCategorie() + "'");
+            }
+            if (requete.toLowerCase().contains("mobile") ) {
+                return getproduits("SELECT * FROM v_produits WHERE categorie = 'Telephone'");
             }
         }
 
         // Recherche avec marque uniquement
         for (int i = 0; i < getmarques().size(); i++) {
             // Rapport qualité-prix avec marque
-            if (requete.contains("meilleur") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getmarques().get(i).getMarque())) {
+            if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getmarques().get(i).getMarque().toLowerCase())) {
                 // Qualité-prix le plus proche de 1
                 return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getmarques().get(i).getMarque() + "' ORDER BY (qualite/prix) DESC LIMIT 1");
             }
-            if (requete.contains("pire") && requete.contains("prix") && requete.contains("qualite") && requete.contains(getmarques().get(i).getMarque())) {
+            if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite") && requete.toLowerCase().contains(getmarques().get(i).getMarque().toLowerCase())) {
                 // Qualité-prix le plus proche de 1
                 return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits WHERE categorie = '" + getmarques().get(i).getMarque() + "' ORDER BY (qualite/prix) ASC LIMIT 1");
             }
             
             // Recherche avec marque
-            if (requete.contains("meilleur") && requete.contains("prix") && requete.contains(getmarques().get(i).getMarque())) {
+            if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(i).getMarque().toLowerCase())) {
                 return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MIN(prix) FROM v_produits WHERE marque = '" + getmarques().get(i).getMarque() + "')");
             }
-            if (requete.contains("pire") && requete.contains("prix") && requete.contains(getmarques().get(i).getMarque())) {
+            if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(i).getMarque().toLowerCase())) {
                 return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MAX(prix) FROM v_produits WHERE marque = '" + getmarques().get(i).getMarque() + "')");
             }
 
             // Recherche normale
-            if (requete.contains("prix") && requete.contains(getmarques().get(i).getMarque())) {
+            if (requete.toLowerCase().contains("prix") && requete.toLowerCase().contains(getmarques().get(i).getMarque().toLowerCase())) {
                 return getproduits("SELECT * FROM v_produits WHERE marque = '" + getmarques().get(i).getMarque() + "'");
             }
         }
 
         // Rapport qualité-prix
-        if (requete.contains("meilleur") && requete.contains("prix") && requete.contains("qualite")) {
+        if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite")) {
             // Qualité-prix le plus proche de 1
             return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits ORDER BY (qualite/prix) DESC LIMIT 1");
         }
-        if (requete.contains("pire") && requete.contains("prix") && requete.contains("qualite")) {
+        if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix") && requete.toLowerCase().contains("qualite")) {
             // Qualité-prix le plus proche de 1
             return getproduits("SELECT *, (qualite/prix) AS qualite_prix FROM v_produits ORDER BY (qualite/prix) ASC LIMIT 1");
         }
 
         // Recherche normale
-        if (requete.contains("meilleur") && requete.contains("prix")) {
+        if (requete.toLowerCase().contains("meilleur") && requete.toLowerCase().contains("prix")) {
             return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MIN(prix) FROM v_produits)");
         }
-        if (requete.contains("pire") && requete.contains("prix")) {
+        if (requete.toLowerCase().contains("pire") && requete.toLowerCase().contains("prix")) {
             return getproduits("SELECT * FROM v_produits WHERE prix = (SELECT MAX(prix) FROM v_produits)");
         }
-        if (requete.contains("prix")) {
+        if (requete.toLowerCase().contains("prix")) {
             return getproduits("SELECT * FROM v_produits");
         }
 
         return produits;
     }
-
 }
